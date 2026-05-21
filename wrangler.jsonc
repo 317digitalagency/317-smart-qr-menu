@@ -1,19 +1,74 @@
 /**
- * For more details on how to configure Wrangler, refer to:
+ * wrangler.jsonc — Cloudflare Workers configuration for menu.org.tr
  * https://developers.cloudflare.com/workers/wrangler/configuration/
  */
 {
-	"$schema": "node_modules/wrangler/config-schema.json",
-	"name": "317-smart-qr-menu",
-	"main": ".open-next/worker.js",
-	"compatibility_date": "2025-10-08",
-	"compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
-	"assets": {
-		"binding": "ASSETS",
-		"directory": ".open-next/assets"
-	},
-	"observability": {
-		"enabled": true
-	},
-	"upload_source_maps": true
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "menu-org-tr",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-05-20",
+  "compatibility_flags": ["nodejs_compat"],
+  "upload_source_maps": true,
+  "observability": { "enabled": true },
+
+  "assets": {
+    "binding": "ASSETS",
+    "directory": ".open-next/assets"
+  },
+
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "menu-org-tr-db",
+      "database_id": "c45d5768-c7fe-4b91-b930-3854ad72b749"
+    }
+  ],
+
+  "r2_buckets": [
+    {
+      "binding": "ASSETS_BUCKET",
+      "bucket_name": "menu-org-tr-assets"
+    }
+  ],
+
+  "kv_namespaces": [
+    {
+      "binding": "CACHE",
+      "id": "9df3405636f34ef9a3b55dd3c44a0b8b",
+      "preview_id": "9df3405636f34ef9a3b55dd3c44a0b8b"
+    }
+  ],
+
+  "queues": {
+    "producers": [
+      {
+        "binding": "ANALYTICS_QUEUE",
+        "queue": "menu-org-tr-analytics"
+      }
+    ],
+    "consumers": [
+      {
+        "queue": "menu-org-tr-analytics",
+        "max_batch_size": 50,
+        "max_batch_timeout": 5,
+        "dead_letter_queue": "menu-org-tr-analytics-dlq"
+      }
+    ]
+  },
+
+  "triggers": {
+    "crons": ["0 2 * * *"]
+  },
+
+  "vars": {
+    "NODE_ENV": "production",
+    "APP_URL": "https://app.menu.org.tr",
+    "PUBLIC_URL": "https://menu.org.tr",
+    "R2_PUBLIC_URL": "https://assets.menu.org.tr"
+  }
+
+  // Secrets — set with: wrangler secret put TURNSTILE_SECRET_KEY
+  // TURNSTILE_SECRET_KEY
+  // SESSION_ENCRYPTION_KEY
+  // HASH_PEPPER
 }
